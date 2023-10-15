@@ -1,2 +1,2 @@
 # Dry
-Utilities for each project 
+Utilities for every project 
