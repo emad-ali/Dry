@@ -1,15 +1,19 @@
 
 namespace EmadAli.Dry;
 
-public abstract class Pipeline<T>
+public abstract class BasePipeline<T> : IPipeline<T>
 {
+    public BasePipeline()
+    {
+        Build();
+    }
     private readonly List<IProcess<T>> processes = new List<IProcess<T>>();
 
     /// <summary>
     /// Add a filter "process | operation" to the pipeline 
     /// </summary>
     /// <param name="process">Filter "Process | Operation"</param>
-    public Pipeline<T> Add(IProcess<T> process)
+    public IPipeline<T> Add(IProcess<T> process)
     {
         processes.Add(process);
         return this;
@@ -20,14 +24,19 @@ public abstract class Pipeline<T>
     /// </summary>
     /// <param name="message">Message to be processed</param>
     /// <returns>T</returns>
-    public T Process(T message)
+    public async Task<T> ProcessAsync(T message)
     {
-        return processes.Aggregate(message, (msgUnderProcessing, process) => process.Execute(msgUnderProcessing));
+        var res = message;
+        foreach (var process in processes)
+        {
+            res = await process.ExecuteAsync(res);
+        }
+        return res;
     }
     /// <summary>
     /// Build the pipeline by adding IProcess/es
     /// </summary>
     /// <returns>Pipeline</returns>
-    public abstract Pipeline<T> Build();
+    public abstract void Build();
 
 }
